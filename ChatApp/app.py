@@ -134,9 +134,12 @@ def is_admin():
 #管理者：個人チャット一覧へ
 @app.route('/admin/private/list', methods=['GET'])
 def private_list_view():
-    if not is_admin:
+    if not session.get('is_admin'):
         return redirect(url_for("login_view"))
-    users = Private_chats.get_all_users()
+    users = UserModel.get_all_users()
+
+    if not users:
+        users = []
     return render_template('admin/private_list.html', users=users)
 
 #個人チャット画面
@@ -278,9 +281,6 @@ def enter_private_chat():
 @app.route("/send_message", methods=["POST"])
 def send_message():
     user_id = session("user_id")
-    if not user_id:
-        return redirect(url_for("login_view"))
-    
     chat_id = request.form("chat_id")
     content = request.form("content")
     target_user_id = request.form.get("user_id")
