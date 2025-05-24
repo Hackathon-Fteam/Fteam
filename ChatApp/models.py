@@ -169,7 +169,7 @@ class Group:
     def find_by_user_id(cls, user_id):
         conn = db_pool.get_conn()
         try:
-            with conn.cursor(pymysql.cursors.DictCurso) as cur:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
                 sql = """
                 SELECT group_chats.id, group_chats.name
                 FROM group_members
@@ -309,26 +309,28 @@ class GroupMessage:
         finally:
             db_pool.release(conn)
 
-    @classmethod
-    def get_all(cls, group_chats_id):
-        conn = db_pool.get_conn()
-        try:
-            with conn.cursor(pymysql.cursors.DictCursor) as cur:
-                sql = """
-                    SELECT users.user_name, group_messages.content
-                    FROM group_messages
-                    JOIN users ON group_messages.user_id = users.uid
-                    WHERE group_messages.group_chats_id = %s
-                    ORDER BY group_messages.created_at ASC
-                """
-                cur.execute(sql, (group_chats_id,))
-                messages = cur.fetchall()
-                return messages
-        except pymysql.Error as e:
-            print(f'エラーが発生しています: {e}')
-            abort(500)
-        finally:
-            db_pool.release(conn)
+@classmethod
+def get_all(cls, group_chats_id):
+    conn = db_pool.get_conn()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
+            sql = """
+                SELECT group_messages.user_id AS uid,
+                        users.user_name,
+                        group_messages.content
+                FROM group_messages
+                JOIN users ON group_messages.user_id = users.uid
+                WHERE group_messages.group_chats_id = %s
+                ORDER BY group_messages.created_at ASC
+            """
+            cur.execute(sql, (group_chats_id,))
+            messages = cur.fetchall()
+            return messages
+    except pymysql.Error as e:
+        print(f'エラーが発生しています: {e}')
+        abort(500)
+    finally:
+        db_pool.release(conn)
 
 #オープンチャットクラス
 class OpenChat:

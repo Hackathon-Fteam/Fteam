@@ -24,7 +24,7 @@
         <div id ="message-area">
             {% if messages|length > 0 %} <!-- メッセージの長さが1以上だと送信可能 -->
             {% for message in messages %} <!-- 複数メッセージの中から、順に一つだけ選択し20行目以降のループをする。このmessageには、バックエンドに記載している①UID②CID③messageが含まれている-->
-            {% if message.uid == uid %} <!-- メッセージを送信したユーザーが、ログインしているユーザーと同じ場合、以下適用する。-->
+            {% if message.uid == current_user_id %} <!-- メッセージを送信したユーザーが、ログインしているユーザーと同じ場合、以下適用する。-->
             <div class="my-messages">
                 <p class="box box-right">{{ message.message }}</p> <!-- 左のメッセージには、①UID②CID③messageが含まれており、その中のmessageを表示させる文言-->
                 <form
@@ -44,7 +44,7 @@
             </div>
             <div class="typing-box-wrapper"> <!-- メッセージ入力画面 -->
                 <form class="typing-box" method="POST" name="newMessageForm">
-                <textarea name="message" id="message" autofocus></textarea>
+                <textarea name="content" id="message" autofocus></textarea>
                 <input type="hidden" name="cid" value="{{ group_chat_id  }}" />
                 <button type="submit" id="add-message-button">
                     <ion-icon name="paper-plane"></ion-icon> <!--紙飛行機のアイコンの表示-->
@@ -57,11 +57,11 @@
 {% endblock %}
 
 {% block script%}
-<scrip type="text/javascript">
+<script type="text/javascript">
    // prettier-ignore 
-    const uid = JSON.parse('{{ uid|tojson }}');
+    const uid = JSON.parse('{{ current_user_id|tojson }}');
 </script>
-
+{% endblock %}
 <!-- 以下コメントアウト -->
 {#
 <script
